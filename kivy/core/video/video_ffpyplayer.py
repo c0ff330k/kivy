@@ -396,6 +396,19 @@ class VideoFFPy(VideoBase):
             'sn': True,
             'volume': self._volume,
         }
+        
+        # attempt to use hwaccel or use deinterlace filter if hwaccel not supported
+        if 'h264_cuvid' in ffpyplayer.tools.get_codecs(0, 1, 1):
+            ff_opts['vcodec'] = 'h264_cuvid'
+        elif 'h264_v4l2m2m' in ffpyplayer.tools.get_codecs(0, 1, 1):
+            ff_opts['vcodec'] = 'h264_v4l2m2m'
+        if 'vcodec' in ff_opts:
+            Logger.info('VideoFFPy: Using hwaccelerated {} decoder for this video'.format(ff_opts['vcodec']))
+        else:
+            ff_opts['vf'] = ['yadif']
+            Logger.info('VideoFFPy: Using deinterlace filter as hwaccel not supported')
+        
+        # create MediaPlayer instance
         ffplayer = MediaPlayer(
             self._filename, callback=self._player_callback,
             thread_lib='SDL',

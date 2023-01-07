@@ -62,6 +62,7 @@ from kivy.graphics import Rectangle, BindTexture
 from kivy.graphics.texture import Texture
 from kivy.graphics.fbo import Fbo
 from kivy.weakmethod import WeakMethod
+from kivy.utils import platform as hwplatform
 import time
 
 Logger.info('VideoFFPy: Using ffpyplayer {}'.format(ffpyplayer.version))
@@ -396,6 +397,10 @@ class VideoFFPy(VideoBase):
             'sn': True,
             'volume': self._volume,
         }
+        
+        # use neon + vfp cpuflags if platform is android:
+        if hwplatform == 'android':
+            ff_opts['cpuflags'] = 'neon+vfp'
         
         # attempt to use hwaccel or use deinterlace filter if hwaccel not supported
         if 'h264_cuvid' in ffpyplayer.tools.get_codecs(0, 1, 1):
